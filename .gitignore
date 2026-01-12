@@ -44,3 +44,6 @@ coverage/
 # Temp files
 tmp/
 *.tmp
+
+# Uploaded files (local dev)
+uploads/
