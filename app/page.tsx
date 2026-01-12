@@ -199,6 +199,7 @@ export default function Home() {
       id: generateId(),
       name: 'New Subservice',
       description: '',
+      languages: {},
       assignedContentIds: [],
     };
     setServices((prev) =>
@@ -282,30 +283,20 @@ export default function Home() {
     };
 
     const buildSubservices = (service: DraftService): Subservice[] => {
-      const fromContent = contentItems
-        .filter((i) => i.assignedTo?.serviceId === service.id && i.assignedTo?.field === 'subservice')
-        .map((i): Subservice => ({
-          id: i.id,
-          name: i.text,
-          description: '',
-          quantity: 1,
-          languages: {},
-          isAmbiguous: false,
-          confidence: 1,
-        }));
-
-      const manual = service.subservices.map((sub): Subservice => ({
+      return service.subservices.map((sub): Subservice => ({
         id: sub.id,
         name: sub.name,
         description: sub.description,
         hours: sub.hours,
         quantity: 1,
-        languages: {},
+        languages: {
+          assumptions: sub.languages?.assumptions,
+          customer: sub.languages?.customer,
+          implementation_language: sub.languages?.implementation_language,
+        },
         isAmbiguous: false,
         confidence: 1,
       }));
-
-      return [...fromContent, ...manual];
     };
 
     return {

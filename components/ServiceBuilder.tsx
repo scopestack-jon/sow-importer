@@ -240,7 +240,7 @@ function ServiceCard({
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-medium text-[var(--neutral-500)] uppercase tracking-wide">
-                Subservices ({service.subservices.length + contentByField.subservice.length})
+                Subservices ({service.subservices.length})
               </label>
               <button
                 onClick={onAddSubservice}
@@ -250,50 +250,20 @@ function ServiceCard({
               </button>
             </div>
 
-            <div className="space-y-2">
-              {/* Content assigned as subservices */}
-              {contentByField.subservice.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-start gap-2 p-2 bg-[var(--subservice-bg)] rounded-lg"
-                >
-                  <span className="badge-subservice shrink-0 mt-0.5">Sub</span>
-                  <p className="flex-1 text-sm">{item.text}</p>
-                  <button
-                    onClick={() => onRemoveContent(item.id)}
-                    className="p-0.5 hover:bg-[var(--error-bg)] rounded"
-                  >
-                    <XIcon className="h-3 w-3 text-[var(--error)]" />
-                  </button>
-                </div>
-              ))}
-
-              {/* Manual subservices */}
+            <div className="space-y-3">
+              {/* Manual subservices with full editing */}
               {service.subservices.map((sub) => (
-                <div
+                <SubserviceCard
                   key={sub.id}
-                  className="flex items-start gap-2 p-2 bg-[var(--subservice-bg)] rounded-lg"
-                >
-                  <span className="badge-subservice shrink-0 mt-0.5">Sub</span>
-                  <input
-                    type="text"
-                    value={sub.name}
-                    onChange={(e) => onUpdateSubservice(sub.id, { name: e.target.value })}
-                    className="flex-1 text-sm bg-transparent focus:outline-none focus:ring-1 focus:ring-[var(--accent)] rounded px-1"
-                    placeholder="Subservice name..."
-                  />
-                  <button
-                    onClick={() => onDeleteSubservice(sub.id)}
-                    className="p-0.5 hover:bg-[var(--error-bg)] rounded"
-                  >
-                    <XIcon className="h-3 w-3 text-[var(--error)]" />
-                  </button>
-                </div>
+                  subservice={sub}
+                  onUpdate={(updates) => onUpdateSubservice(sub.id, updates)}
+                  onDelete={() => onDeleteSubservice(sub.id)}
+                />
               ))}
 
-              {service.subservices.length === 0 && contentByField.subservice.length === 0 && (
+              {service.subservices.length === 0 && (
                 <p className="text-sm text-[var(--neutral-400)] italic">
-                  No subservices. Click on items in the document and select &quot;As Subservice&quot;.
+                  No subservices. Click &quot;+ Add Subservice&quot; or assign content as subservice.
                 </p>
               )}
             </div>
@@ -352,6 +322,121 @@ function FieldSection({ label, items, manualValue, onManualChange, onRemoveConte
           className="w-full px-3 py-2 text-sm border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)] font-mono"
           placeholder={`Enter ${label.toLowerCase()} or assign content from document...`}
         />
+      )}
+    </div>
+  );
+}
+
+type SubserviceCardProps = {
+  subservice: DraftSubservice;
+  onUpdate: (updates: Partial<DraftSubservice>) => void;
+  onDelete: () => void;
+};
+
+function SubserviceCard({ subservice, onUpdate, onDelete }: SubserviceCardProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div className="border border-[var(--border)] rounded-lg overflow-hidden bg-[var(--subservice-bg)]">
+      {/* Header */}
+      <div
+        className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-[var(--background-muted)] transition-colors"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <button className="p-0.5">
+          {isExpanded ? (
+            <ChevronDownIcon className="h-3 w-3 text-[var(--subservice)]" />
+          ) : (
+            <ChevronRightIcon className="h-3 w-3 text-[var(--subservice)]" />
+          )}
+        </button>
+        <span className="badge-subservice">Sub</span>
+        <input
+          type="text"
+          value={subservice.name}
+          onChange={(e) => onUpdate({ name: e.target.value })}
+          onClick={(e) => e.stopPropagation()}
+          className="flex-1 text-sm bg-transparent font-medium focus:outline-none focus:ring-1 focus:ring-[var(--accent)] rounded px-1"
+          placeholder="Subservice name..."
+        />
+        <input
+          type="number"
+          value={subservice.hours || ''}
+          onChange={(e) => onUpdate({ hours: e.target.value ? Number(e.target.value) : undefined })}
+          onClick={(e) => e.stopPropagation()}
+          className="w-16 text-sm text-center bg-[var(--background)] border border-[var(--border)] rounded px-1 py-0.5"
+          placeholder="Hrs"
+        />
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          className="p-0.5 hover:bg-[var(--error-bg)] rounded"
+        >
+          <XIcon className="h-3 w-3 text-[var(--error)]" />
+        </button>
+      </div>
+
+      {/* Expanded content */}
+      {isExpanded && (
+        <div className="p-3 pt-0 space-y-3 border-t border-[var(--border)] bg-[var(--background)]">
+          {/* Description */}
+          <div>
+            <label className="block text-xs font-medium text-[var(--neutral-500)] mb-1">
+              Service Description
+            </label>
+            <textarea
+              value={subservice.description}
+              onChange={(e) => onUpdate({ description: e.target.value })}
+              rows={2}
+              className="w-full px-2 py-1.5 text-sm border border-[var(--border)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--accent)] font-mono"
+              placeholder="Describe what this subservice includes..."
+            />
+          </div>
+
+          {/* Key Assumptions */}
+          <div>
+            <label className="block text-xs font-medium text-[var(--neutral-500)] mb-1">
+              Key Assumptions
+            </label>
+            <textarea
+              value={subservice.languages?.assumptions || ''}
+              onChange={(e) => onUpdate({ languages: { ...subservice.languages, assumptions: e.target.value } })}
+              rows={2}
+              className="w-full px-2 py-1.5 text-sm border border-[var(--border)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--accent)] font-mono"
+              placeholder="Assumptions for this subservice..."
+            />
+          </div>
+
+          {/* Client Responsibilities */}
+          <div>
+            <label className="block text-xs font-medium text-[var(--neutral-500)] mb-1">
+              Client Responsibilities
+            </label>
+            <textarea
+              value={subservice.languages?.customer || ''}
+              onChange={(e) => onUpdate({ languages: { ...subservice.languages, customer: e.target.value } })}
+              rows={2}
+              className="w-full px-2 py-1.5 text-sm border border-[var(--border)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--accent)] font-mono"
+              placeholder="Client responsibilities for this subservice..."
+            />
+          </div>
+
+          {/* Implementation Details */}
+          <div>
+            <label className="block text-xs font-medium text-[var(--neutral-500)] mb-1">
+              Implementation Details
+            </label>
+            <textarea
+              value={subservice.languages?.implementation_language || ''}
+              onChange={(e) => onUpdate({ languages: { ...subservice.languages, implementation_language: e.target.value } })}
+              rows={2}
+              className="w-full px-2 py-1.5 text-sm border border-[var(--border)] rounded focus:outline-none focus:ring-1 focus:ring-[var(--accent)] font-mono"
+              placeholder="Implementation details..."
+            />
+          </div>
+        </div>
       )}
     </div>
   );

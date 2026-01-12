@@ -12,6 +12,8 @@ export type ContentItem = {
   assignedTo?: {
     serviceId: string;
     field: ContentAssignmentField;
+    subserviceId?: string;
+    subserviceField?: SubserviceAssignmentField;
   };
 };
 
@@ -24,6 +26,13 @@ export type ContentAssignmentField =
   | 'deliverables'
   | 'implementation_language'
   | 'subservice';
+
+export type SubserviceAssignmentField =
+  | 'name'
+  | 'description'
+  | 'assumptions'
+  | 'customer'
+  | 'implementation_language';
 
 export type DraftService = {
   id: string;
@@ -42,7 +51,19 @@ export type DraftSubservice = {
   name: string;
   description: string;
   hours?: number;
+  languages: {
+    assumptions?: string;
+    customer?: string;
+    implementation_language?: string;
+  };
   assignedContentIds: string[];
+};
+
+export type ContentAssignment = {
+  serviceId: string;
+  field: ContentAssignmentField;
+  subserviceId?: string;
+  subserviceField?: SubserviceAssignmentField;
 };
 
 export type BuilderState = {
