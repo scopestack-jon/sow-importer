@@ -1,5 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const pdfParse = require('pdf-parse');
 import { randomUUID } from 'crypto';
 import type {
   ParsedDocument,
@@ -25,7 +23,11 @@ export async function parsePdf(
   fileName: string
 ): Promise<ParseResult> {
   try {
-    const data: PdfData = await pdfParse(fileBuffer);
+    // Dynamic import to avoid build issues with canvas dependency
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const pdfParseModule = await import('pdf-parse');
+    const pdfParse = (pdfParseModule as unknown as { default: (buffer: Buffer) => Promise<PdfData> }).default || pdfParseModule;
+    const data: PdfData = await (pdfParse as (buffer: Buffer) => Promise<PdfData>)(fileBuffer);
 
     const { sections, tables } = extractStructure(data.text);
 
