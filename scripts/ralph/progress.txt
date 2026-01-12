@@ -1,0 +1,11 @@
+# Ralph Progress Log
+Started: 2026-01-12
+
+## Feature: SOW Importer
+Web utility to import Statement of Work documents into ScopeStack.
+See /tasks/prd-sow-importer.md for full PRD.
+
+## Codebase Patterns
+(To be populated as Ralph discovers patterns)
+
+---
