@@ -87,7 +87,7 @@ function parseHtmlContent(html: string): {
 
   // Split by headings
   const headingRegex = /<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/gi;
-  const parts: Array<{ level: HeadingLevel; title: string; startIndex: number }> = [];
+  const parts: Array<{ level: HeadingLevel; title: string; startIndex: number; matchLength: number }> = [];
   
   let match;
   while ((match = headingRegex.exec(htmlWithoutTables)) !== null) {
@@ -95,6 +95,7 @@ function parseHtmlContent(html: string): {
       level: parseInt(match[1], 10) as HeadingLevel,
       title: stripHtml(match[2]),
       startIndex: match.index,
+      matchLength: match[0].length,
     });
   }
 
@@ -103,7 +104,7 @@ function parseHtmlContent(html: string): {
     const current = parts[i];
     const next = parts[i + 1];
     
-    const contentStart = current.startIndex + match![0].length;
+    const contentStart = current.startIndex + current.matchLength;
     const contentEnd = next ? next.startIndex : htmlWithoutTables.length;
     const contentHtml = htmlWithoutTables.slice(contentStart, contentEnd);
     
